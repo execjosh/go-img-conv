@@ -13,9 +13,25 @@ import (
 )
 
 func main() {
-	inputFilePath := os.Args[1]
+	inputDir := os.Args[1]
 
-	err := convertFromJpegToPng(inputFilePath)
+	err := filepath.Walk(inputDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Fprintln(os.Stderr, path, ":", err)
+			return nil
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if err := convertFromJpegToPng(path); err != nil {
+			fmt.Fprintln(os.Stderr, path, ":", err)
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -34,7 +50,7 @@ func convertFromJpegToPng(inputFilePath string) error {
 		return errors.New(fmt.Sprint("Cannot decode image:", inputFilePath))
 	}
 	if fmtName != "jpeg" {
-		return errors.New(fmt.Sprint("Expected JPEG but got:", fmtName))
+		return errors.New("Not a JPEG")
 	}
 
 	outputFilePath := strings.TrimSuffix(inputFilePath, filepath.Ext(inputFilePath)) + ".png"
