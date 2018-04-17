@@ -15,7 +15,14 @@ import (
 func main() {
 	inputDir := os.Args[1]
 
-	err := filepath.Walk(inputDir, func(path string, info os.FileInfo, err error) error {
+	if err := convertAllJpegToPngIn(inputDir); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func convertAllJpegToPngIn(inputDir string) error {
+	return filepath.Walk(inputDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, path, ":", err)
 			return nil
@@ -31,11 +38,6 @@ func main() {
 
 		return nil
 	})
-
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
 }
 
 func convertFromJpegToPng(inputFilePath string) error {
