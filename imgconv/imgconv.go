@@ -15,9 +15,21 @@ import (
 	_ "image/jpeg" // Register JPEG codec
 )
 
-// ConvertAllJpegToPngIn traverses inputDir and attempts to convert JPEGs to PNGs
-func ConvertAllJpegToPngIn(inputDir string) error {
-	return filepath.Walk(inputDir, func(path string, info os.FileInfo, err error) error {
+// ImgConv main type
+type ImgConv struct {
+	rootDir string
+}
+
+// New creates an ImgConv
+func New(rootDir string) *ImgConv {
+	return &ImgConv{
+		rootDir: rootDir,
+	}
+}
+
+// JpegToPng traverses RootDir and attempts to convert JPEGs to PNGs
+func (c *ImgConv) JpegToPng() error {
+	return filepath.Walk(c.rootDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, path, ":", err)
 			return nil

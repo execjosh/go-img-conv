@@ -10,7 +10,9 @@ import (
 func main() {
 	inputDir := os.Args[1]
 
-	if err := imgconv.ConvertAllJpegToPngIn(inputDir); err != nil {
+	ic := imgconv.New(inputDir)
+
+	if err := ic.JpegToPng(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
