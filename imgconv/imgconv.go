@@ -27,8 +27,19 @@ func New(rootDir string) *ImgConv {
 	}
 }
 
-// JpegToPng traverses RootDir and attempts to convert JPEGs to PNGs
-func (c *ImgConv) JpegToPng() error {
+// Convert traverses rootDir and attempts to convert images from `from` to `to`
+func (c *ImgConv) Convert(from, to string) error {
+	if from == to {
+		return errors.New("from and to are the same")
+	}
+
+	var converter func(string) error
+	if from == "jpeg" && to == "png" {
+		converter = convertFromJpegToPng
+	} else {
+		return errors.New("Conversion not yet impelemted")
+	}
+
 	return filepath.Walk(c.rootDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, path, ":", err)
@@ -39,7 +50,7 @@ func (c *ImgConv) JpegToPng() error {
 			return nil
 		}
 
-		if err := convertFromJpegToPng(path); err != nil {
+		if err := converter(path); err != nil {
 			fmt.Fprintln(os.Stderr, path, ":", err)
 		}
 
