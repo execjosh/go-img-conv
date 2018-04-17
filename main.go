@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,12 +42,30 @@ func convertAllJpegToPngIn(inputDir string) error {
 	})
 }
 
+func detectContentType(f *os.File) string {
+	// Make sure we return to top of file
+	defer f.Seek(0, 0)
+
+	buf := make([]byte, 128)
+
+	n, err := f.Read(buf)
+	if err != nil && err != io.EOF {
+		return "unknown"
+	}
+
+	return http.DetectContentType(buf[:n])
+}
+
 func convertFromJpegToPng(inputFilePath string) error {
 	f, err := os.Open(inputFilePath)
 	if err != nil {
 		return errors.New(fmt.Sprint("Cannot open file"))
 	}
 	defer f.Close()
+
+	if detectContentType(f) != "image/jpeg" {
+		return errors.New("Not a JPEG")
+	}
 
 	m, fmtName, err := image.Decode(f)
 	if err != nil {
